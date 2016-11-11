@@ -1,0 +1,34 @@
+# Install some basic tools on all of our containers so they'll work as
+# ansible targets
+- hosts: all
+  gather_facts: false
+  tasks:
+    - raw: which python || apt-get update
+    - raw: which python || apt-get install -y python python-apt
+
+
+# These are the tasks that get run on our apache hosts at build time
+# To simplify this for your setup, you can use all the techniques you use
+# already, such as including roles, other playbooks, etc.
+- hosts: webserver
+  vars:
+    app_jar: dropwizard-helloworld-0.0.1-SNAPSHOT.jar
+    app_log_path: /tmp/app.log
+    app_config_filepath: /apps/dropwizard-helloworld.yml
+
+  tasks:
+
+    - name: install that thing called java
+      apt: name=default-jre
+
+    - name: create target app dir
+      file: path=/apps state=directory 
+
+    - name: create apps/logs
+      file: name=/apps/logs state=directory
+
+    - name: Copy build package
+      copy: src={{ lookup('pipe','dirname `pwd`') }}/artifacts/{{ app_jar }} dest=/apps/{{ app_jar }}
+
+    - name: Transfer config file
+      copy: src={{ lookup('pipe','dirname `pwd`') }}/artifacts/dev_config.yml dest={{ app_config_filepath }}

@@ -1,0 +1,9 @@
+version: "1"                       # docker-compose file compatibility version
+services:
+  webserver:                          # how our apache container should be configured
+    image: ubuntu:trusty               # starting image you want to apply ansible commands to
+    command: java -jar /apps/dropwizard-helloworld-0.0.1-SNAPSHOT.jar server /apps/dropwizard-helloworld.yml  2>&1 | tee /tmp/app.log   # container commands are NOT run on build, and
+                                   # if we want them run on run time, they need to be here.
+
+    ports:
+      - "8080:8080"
